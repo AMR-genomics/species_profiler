@@ -9,4 +9,4 @@ COPY --from=staphb/fastani:1.34 /usr/local/bin/fastANI /app/
 
 VOLUME /cwd
 WORKDIR /cwd
-#ENTRYPOINT ["/app/species_profiler"]
+ENTRYPOINT ["/app/species_profiler"]

@@ -38,7 +38,7 @@ db <- readr::read_tsv(file.path(opt$options$db,"db.tsv"),col_types = "c")
 # Run FastANI
 #-#-#-#-#-#-#-#-#-#
 ani_file <- tempfile()
-cmd <- stringr::str_glue("/app/fastANI --threads {opt$thread} --refList {file.path(opt$options$db,'fastANI.rl')} --query '{opt$args}' --output {ani_file}")
+cmd <- stringr::str_glue("/app/fastANI --threads {opt$options$thread} --refList {file.path(opt$options$db,'fastANI.rl')} --query '{opt$args}' --output {ani_file}")
 print(cmd)
 system(cmd)
 
