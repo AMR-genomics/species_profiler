@@ -1,17 +1,18 @@
 #!/usr/bin/env Rscript
 
-
-docker run --rm --platform linux/amd64 staphb/ncbi-datasets:16.30.0 db_download.sh
 	
 #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
 # Load the list of reference genome downloaded from NCBI
 #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
 library(tidyverse)
-ss <- read_tsv("data/ncbi_dataset/ncbi_dataset/data/data_summary.tsv",col_types = cols("Taxonomy id"="c")) |>
-	mutate(src_path=str_glue('data/ncbi_dataset/ncbi_dataset/data/{`Assembly Accession`}/{`Assembly Accession`}_{`Assembly Name`}_genomic.fna')) |>
+ss <- read_tsv("data/db_accession.tsv",col_types = cols("Organism Taxonomic ID"="c")) |>
+	left_join(
+		list.files("data","_genomic.fna$",recursive = TRUE,full.names = TRUE) |>
+			enframe(value = "src_path",name=NULL) |>
+			mutate(`Assembly Accession`=basename(dirname(src_path)))
+	) |>
 	mutate(db_path=str_glue('fna/{`Assembly Accession`}.fna')) |>
 	mutate(db_abs_path=file.path("/app/db",db_path))
-
 
 #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
 # Copy the FASTA to the DB folder with appropriate renaming
@@ -39,7 +40,7 @@ read_tax <- function() {
 	tax
 }
 tax <- read_tax() |>
-	mutate(is_db_tax = tax_id %in% ss$`Taxonomy id`) 
+	mutate(is_db_tax = tax_id %in% ss$`Organism Taxonomic ID`) 
 
 # Find all ancestors of selected nodes
 db_ancestors <- igraph::ego(tax,order=100,nodes=igraph::V(tax)[is_db_tax],mode="in") |> 
@@ -61,23 +62,9 @@ TAX <- tax |>
 with_graph(TAX,graph_is_dag())
 with_graph(TAX,graph_is_tree())
 
-# Display the taxomomy tree
-library(ggraph)
-TAX |>
-	ggraph("partition",circular=TRUE) +
-	geom_node_arc_bar(aes(fill = rank), size = 0.25) +
-	coord_equal()
-
-TAX |>
-	ggraph("tree",circular=TRUE) +
-	geom_edge_link() +
-	geom_node_point(aes(color=rank)) +
-	coord_equal() +
-	geom_node_label(aes(label=tax_name,fill = rank), size = 2)
-
 # Build db annotation table
 db <- ss |>
-	select(assembly_acc=`Assembly Accession`,org_name=`Organism Scientific Name`,tax_id=`Taxonomy id`) |>
+	select(assembly_acc=`Assembly Accession`,org_name=`Organism Name`,tax_id=`Organism Taxonomic ID`) |>
 	left_join(
 		inner_join(
 			select(db_ancestors,tax_id=leaf_id,id=ancestor_id),
@@ -88,4 +75,20 @@ db <- ss |>
 	)
 write_tsv(db,file = "app/db/db.tsv",na="")
 
+
+
+# Display the taxonomy tree (for debugging purpose)
+if (require(ggraph)) {
+	TAX |>
+		ggraph("partition",circular=TRUE) +
+		geom_node_arc_bar(aes(fill = rank), size = 0.25) +
+		coord_equal()
+	
+	TAX |>
+		ggraph("tree",circular=TRUE) +
+		geom_edge_link() +
+		geom_node_point(aes(color=rank)) +
+		coord_equal() +
+		geom_node_label(aes(label=tax_name,fill = rank), size = 2)	
+}
 
