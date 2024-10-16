@@ -1,5 +1,8 @@
 #!/usr/bin/env Rscript
 
+
+docker run --rm --platform linux/amd64 staphb/ncbi-datasets:16.30.0 db_download.sh
+	
 #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
 # Load the list of reference genome downloaded from NCBI
 #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
