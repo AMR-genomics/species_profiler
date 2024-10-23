@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+mkdir -p genomes/
+
 # Download Enterobacterales genomes
 datasets download genome taxon 'Enterobacterales' --reference --assembly-level complete --filename Enterobacterales.zip && unzip Enterobacterales.zip -d genomes/Enterobacterales
 

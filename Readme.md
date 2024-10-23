@@ -10,7 +10,8 @@ the output to include NCBI taxonomy informations.
 
 To use the tool, you need to mount the working directory on `/cwd`.
 ```bash
-docker run --rm -it -v .:/cwd unigebsp/species_profiler bash
+docker run --rm -v .:/cwd unigebsp/species_profiler --help
+docker run --rm -v .:/cwd unigebsp/species_profiler --out output.tsv my_assembly.fasta
 ```
 
 
