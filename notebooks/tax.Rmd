@@ -14,13 +14,59 @@ library(ggraph)
 
 
 # Retreive data from docker container
-```{bash}
+```{bash eval=FALSE}
+# Retrieve db.tsv from unigebsp/species_profiler image
 id=$(docker create unigebsp/species_profiler)
-docker cp $id:/app/db/tax.rds ./
 docker cp $id:/app/db/db.tsv ./
 docker rm -v $id
+
+# Download NCBI taxonomy
+wget https://ftp.ncbi.nlm.nih.gov/pub/taxonomy/taxdump.tar.gz && mkdir -p taxdump && tar -C taxdump -zxf taxdump.tar.gz
 ```
 
+
+
+```{r}
+#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
+# Prepare Taxonomy
+#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
+library(tidygraph)
+
+# Load NCBI taxonomy
+read_tax <- function() {
+	SN <- read_tsv(file.path(genomes_dir,"taxdump/names.dmp"),col_names = c("tax_id","tax_name","name_class"),col_types="c_c___c_") |> 
+		filter(name_class=="scientific name") |>
+		mutate(name_class=NULL)
+	N <- read_tsv(file.path(genomes_dir,"taxdump/nodes.dmp"),col_names = c("tax_id","parent","rank"),col_types="c_c_c_____________________") |>
+		left_join(SN,by="tax_id",relationship="one-to-one")
+	tax <- tbl_graph(N,select(N,parent,tax_id),node_key = "tax_id")
+	tax
+}
+
+message("load taxonomy")
+tax <- read_tax() |>
+	mutate(is_db_tax = tax_id %in% ss$`Organism Taxonomic ID`) 
+
+# Find all ancestors of selected nodes
+message("find ancestors")
+db_ancestors <- igraph::ego(tax,order=100,nodes=igraph::V(tax)[is_db_tax],mode="in") |> 
+	map(~.x$tax_id) |>
+	setNames(igraph::V(tax)[is_db_tax]$tax_id) |>
+	enframe(name = "leaf_id",value = "ancestor_id") |>
+	unnest(ancestor_id)
+
+
+# Subset the taxonomy to selected elements and its ancestors
+message("subset taxonomy to selected elements")
+TAX <- tax |>
+	activate(edges) |>
+	filter(!edge_is_loop()) |>
+	activate(nodes) |>
+	mutate(is_db_ancestor = tax_id %in% db_ancestors$ancestor_id) |>
+	filter(is_db_ancestor)
+saveRDS(TAX,file.path(db_dir,"tax.rds"))
+
+```
 
 
 

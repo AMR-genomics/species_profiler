@@ -1,8 +1,5 @@
 #!/usr/bin/env bash
 
-# Download NCBI taxonomy
-wget https://ftp.ncbi.nlm.nih.gov/pub/taxonomy/taxdump.tar.gz && mkdir -p genomes/taxdump && tar -C genomes/taxdump -zxf taxdump.tar.gz
-
 # Download Enterobacterales genomes
 datasets download genome taxon 'Enterobacterales' --reference --assembly-level complete --filename Enterobacterales.zip && unzip Enterobacterales.zip -d genomes/Enterobacterales
 
