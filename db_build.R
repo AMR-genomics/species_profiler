@@ -5,9 +5,9 @@
 # Load the list of reference genome downloaded from NCBI
 #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
 library(tidyverse)
-ss <- read_tsv("data/db_accession.tsv",col_types = cols("Organism Taxonomic ID"="c")) |>
+ss <- read_tsv("genomes/db_accession.tsv",col_types = cols("Organism Taxonomic ID"="c")) |>
 	left_join(
-		list.files("data","_genomic.fna$",recursive = TRUE,full.names = TRUE) |>
+		list.files("genomes","_genomic.fna$",recursive = TRUE,full.names = TRUE) |>
 			enframe(value = "src_path",name=NULL) |>
 			mutate(`Assembly Accession`=basename(dirname(src_path)))
 	) |>
@@ -31,10 +31,10 @@ library(tidygraph)
 
 # Load complete NCBI taxonomy
 read_tax <- function() {
-	SN <- read_tsv("data/taxdump/names.dmp",col_names = c("tax_id","tax_name","name_class"),col_types="c_c___c_") |> 
+	SN <- read_tsv("genomes/taxdump/names.dmp",col_names = c("tax_id","tax_name","name_class"),col_types="c_c___c_") |> 
 		filter(name_class=="scientific name") |>
 		mutate(name_class=NULL)
-	N <- read_tsv("data/taxdump/nodes.dmp",col_names = c("tax_id","parent","rank"),col_types="c_c_c_____________________") |>
+	N <- read_tsv("genomes/taxdump/nodes.dmp",col_names = c("tax_id","parent","rank"),col_types="c_c_c_____________________") |>
 		left_join(SN,by="tax_id",relationship="one-to-one")
 	tax <- tbl_graph(N,select(N,parent,tax_id),node_key = "tax_id")
 	tax

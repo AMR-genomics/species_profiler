@@ -2,7 +2,7 @@
 #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
 # Download genomes and taxonomy from NCBI 
 #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
-FROM --platform=linux/amd64 staphb/ncbi-datasets:16.30.0 AS genomes
+FROM staphb/ncbi-datasets:16.30.0 AS genomes
 WORKDIR /data/
 COPY db_download.sh /data/
 RUN ./db_download.sh
@@ -11,11 +11,11 @@ RUN ./db_download.sh
 # Prepare the database from downloaded genomes
 #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
 FROM rocker/r-ver:4.4.1 AS app_db
-WORKDIR /data/
+RUN /rocker_scripts/install_tidyverse.sh
 RUN install2.r --error --skipinstalled --ncpus -1 \
-      tidyverse tidygraph \
+        tidygraph \
     && rm -rf /tmp/downloaded_packages
-COPY --from=genomes /data/genomes/ /data/
+COPY --from=genomes /data/genomes /app/genomes
 COPY db_build.R /data
 RUN ./db_build.R
 

@@ -21,8 +21,7 @@ from NCBI and the taxonomy tree (`taxdump`). Then `build_db.R` is used to genera
 the database folder `app/db`.
 
 ```bash
-# Run 
-docker run --rm -v ./data/:/data --platform linux/amd64 staphb/ncbi-datasets:16.30.0 ./ncbi_download.sh
+# Run
 docker build --platform linux/amd64 -t unigebsp/species_profiler ./
 ```
 
