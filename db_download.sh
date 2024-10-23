@@ -19,3 +19,4 @@ datasets download genome taxon 'Citrobacter murliniae' --reference --filename Cm
 # Make the tsv file with all accession numbers
 cat genomes/*/ncbi_dataset/data/assembly_data_report.jsonl | dataformat tsv genome --fields accession,organism-name,organism-tax-id,assmstats-total-sequence-len,assmstats-total-number-of-chromosomes > genomes/db_accession.tsv
 
+
