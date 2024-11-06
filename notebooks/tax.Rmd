@@ -4,6 +4,9 @@ output: html_document
 date: "2024-10-23"
 ---
 
+This is a helper notebook to retreive genus names of each organims in the database
+
+
 ```{r setup, include=FALSE}
 knitr::opts_knit$set(root.dir = normalizePath("."))
 knitr::opts_chunk$set(echo = TRUE)
@@ -19,11 +22,19 @@ library(ggraph)
 id=$(docker create unigebsp/species_profiler)
 docker cp $id:/app/db/db.tsv ./
 docker rm -v $id
-
-# Download NCBI taxonomy
-wget https://ftp.ncbi.nlm.nih.gov/pub/taxonomy/taxdump.tar.gz && mkdir -p taxdump && tar -C taxdump -zxf taxdump.tar.gz
 ```
 
+
+```{bash eval=FALSE}
+# Download NCBI taxonomy
+mkdir -p taxdump && curl -kL https://ftp.ncbi.nlm.nih.gov/pub/taxonomy/taxdump.tar.gz | tar -C taxdump -zxf -
+```
+
+
+# Load DB
+```{r}
+db <- read_tsv("db.tsv") 
+```
 
 
 ```{r}
@@ -34,10 +45,10 @@ library(tidygraph)
 
 # Load NCBI taxonomy
 read_tax <- function() {
-	SN <- read_tsv(file.path(genomes_dir,"taxdump/names.dmp"),col_names = c("tax_id","tax_name","name_class"),col_types="c_c___c_") |> 
+	SN <- read_tsv("taxdump/names.dmp",col_names = c("tax_id","tax_name","name_class"),col_types="c_c___c_") |> 
 		filter(name_class=="scientific name") |>
 		mutate(name_class=NULL)
-	N <- read_tsv(file.path(genomes_dir,"taxdump/nodes.dmp"),col_names = c("tax_id","parent","rank"),col_types="c_c_c_____________________") |>
+	N <- read_tsv("taxdump/nodes.dmp",col_names = c("tax_id","parent","rank"),col_types="c_c_c_____________________") |>
 		left_join(SN,by="tax_id",relationship="one-to-one")
 	tax <- tbl_graph(N,select(N,parent,tax_id),node_key = "tax_id")
 	tax
@@ -45,7 +56,7 @@ read_tax <- function() {
 
 message("load taxonomy")
 tax <- read_tax() |>
-	mutate(is_db_tax = tax_id %in% ss$`Organism Taxonomic ID`) 
+	mutate(is_db_tax = tax_id %in% db$tax_id) 
 
 # Find all ancestors of selected nodes
 message("find ancestors")
@@ -64,8 +75,7 @@ TAX <- tax |>
 	activate(nodes) |>
 	mutate(is_db_ancestor = tax_id %in% db_ancestors$ancestor_id) |>
 	filter(is_db_ancestor)
-saveRDS(TAX,file.path(db_dir,"tax.rds"))
-
+saveRDS(TAX,"tax.rds")
 ```
 
 
@@ -93,40 +103,11 @@ TAX |>
 
 
 
-
-# DB
 ```{r}
-db <- read_tsv("db.tsv") 
-g <- bind_rows(
-	distinct(tibble(from=db$genus_id,to=db$species_id)),
-	distinct(tibble(from=db$family_id,to=db$genus_id)),
-	distinct(tibble(from=db$order_id,to=db$family_id)),
-	distinct(tibble(from=db$superkingdom_id,to=db$order_id))
-) |>
-	filter(!is.na(from),!is.na(to)) |>
-	as_tbl_graph()
+
 ```
 
 
-```{r}
-ggraph(g,"nicely") + 
-	geom_node_point(size=3) + 
-	geom_edge_link() + 
-	coord_equal()
-
-with_graph(g,graph_is_dag())
-with_graph(g,graph_is_tree())
-
-ggraph(g,"nicely") + 
-	geom_node_point(size=3) + 
-	geom_edge_link() + 
-	coord_equal()
-
-g |>
-	ggraph("partition",circular=TRUE) + 
-		geom_node_arc_bar(size = 0.25) +
-		coord_equal()
-```
 
 
 
