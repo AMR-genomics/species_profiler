@@ -33,7 +33,7 @@ mkdir -p taxdump && curl -kL https://ftp.ncbi.nlm.nih.gov/pub/taxonomy/taxdump.t
 
 # Load DB
 ```{r}
-db <- read_tsv("db.tsv") 
+db <- read_tsv("db.tsv",col_types = "ccc")
 ```
 
 
@@ -79,6 +79,20 @@ saveRDS(TAX,"tax.rds")
 ```
 
 
+# Add genus informations to the database
+```{r}
+DB <- db |>
+	left_join(
+		inner_join(
+			select(db_ancestors,tax_id=leaf_id,id=ancestor_id),
+			select(as_tibble(TAX),id=tax_id,rank=rank,name=tax_name) |>
+				filter(rank %in% c("superkingdom","phylum","class","order","family","genus","species"))
+		) |>
+		pivot_wider(id_cols = "tax_id",names_from = "rank",values_from = c("id","name"),names_glue = "{rank}_{.value}")
+	)
+write_tsv(DB,"db_tax.tsv",na = "")
+```
+
 
 # Taxonomy
 ```{r}
@@ -103,9 +117,6 @@ TAX |>
 
 
 
-```{r}
-
-```
 
 
 
