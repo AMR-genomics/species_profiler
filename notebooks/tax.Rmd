@@ -4,7 +4,8 @@ output: html_document
 date: "2024-10-23"
 ---
 
-This is a helper notebook to retreive genus names of each organims in the database
+This is a helper notebook to show how to retrieve the ranks of each organism in 
+the database.
 
 
 ```{r setup, include=FALSE}
