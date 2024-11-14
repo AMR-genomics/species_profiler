@@ -8,8 +8,9 @@ datasets download genome taxon 'Enterobacterales' --reference --assembly-level c
 # Download additional complete genomes
 datasets download genome taxon 'Pseudomonas aeruginosa' --reference --assembly-level complete --filename Paeruginosa.zip && unzip Paeruginosa.zip -d genomes/Paeruginosa
 datasets download genome taxon 'Acinetobacter baumannii' --reference --assembly-level complete --filename Abaumannii.zip && unzip Abaumannii.zip -d genomes/Abaumannii
-datasets download genome taxon 'Enterococcus faecium' --reference --assembly-level complete  --filename Efaecium.zip && unzip Efaecium.zip -d genomes/Efaecium
-datasets download genome taxon 'Staphylococcus aureus' --reference --assembly-level complete  --filename Saureus.zip && unzip Saureus.zip -d genomes/Saureus
+datasets download genome taxon 'Enterococcus' --reference --assembly-level complete  --filename Enterococcus.zip && unzip Enterococcus.zip -d genomes/Enterococcus
+datasets download genome taxon 'Staphylococcus' --reference --assembly-level complete  --filename Staphylococcus.zip && unzip Staphylococcus.zip -d genomes/Staphylococcus
+datasets download genome taxon 'Streptococcus' --reference --assembly-level complete  --filename Streptococcus.zip && unzip Streptococcus.zip -d genomes/Streptococcus
 
 # Download additional uncomplete reference genomes
 datasets download genome taxon 'Enterococcus faecalis' --reference --filename Efaecalis.zip && unzip Efaecalis.zip -d genomes/Efaecalis
