@@ -56,8 +56,9 @@ RUN cd /app && ./db_build.R
 FROM base AS species_profiler
 COPY --from=staphb/fastani:1.34 /usr/local/bin/fastANI /app/
 COPY --from=db /app/db /app/db
-COPY species_profiler /app/
+COPY species_profiler /app/bin/
 
 VOLUME /cwd
 WORKDIR /cwd
-ENTRYPOINT ["/app/species_profiler"]
+ENV PATH=$PATH:/app/bin
+ENTRYPOINT []
