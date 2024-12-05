@@ -7,7 +7,7 @@ RUN apt-get update && apt-get install -y \
       libglpk-dev \
     && rm -rf /var/cache/apt/* /var/lib/apt/lists/*;
 RUN install2.r --error --skipinstalled --ncpus -1 \
-        tidygraph optparse ggraph \
+        tidygraph optparse ggraph openxlsx \
     && rm -rf /tmp/downloaded_packages
 
 #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
