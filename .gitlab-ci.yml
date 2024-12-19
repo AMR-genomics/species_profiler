@@ -1,0 +1,18 @@
+build:
+  stage: build
+  image: quay.io/buildah/stable
+
+  variables:
+    STORAGE_DRIVER: vfs
+    BUILDAH_FORMAT: docker
+    IMAGE_TAG: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG
+
+  before_script:
+    - echo "$CI_REGISTRY_PASSWORD" | buildah login -u "$CI_REGISTRY_USER" --password-stdin $CI_REGISTRY
+
+  script:
+    - buildah images
+    - buildah build -t $IMAGE_TAG
+    - buildah images
+    - buildah push $IMAGE_TAG
+
