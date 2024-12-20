@@ -12,7 +12,7 @@ the output to include NCBI taxonomy informations.
 
 To use the tool, you need to mount the working directory on `/cwd`. Example:
 ```bash
-docker run --rm -v .:/cwd unigebsp/species_profiler species_profiler --out output.tsv my_assembly.fasta
+docker run --rm -v .:/cwd registry.gitlab.unige.ch/amr-genomics/species_profiler species_profiler --out output.tsv my_assembly.fasta
 ```
 
 
@@ -20,7 +20,7 @@ docker run --rm -v .:/cwd unigebsp/species_profiler species_profiler --out outpu
 
 To build the container locally, run:
 ```bash
-docker build --platform linux/amd64 -t unigebsp/species_profiler ./
+docker build --platform linux/amd64 -t registry.gitlab.unige.ch/amr-genomics/species_profiler ./
 ```
 
 
